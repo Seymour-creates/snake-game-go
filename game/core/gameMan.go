@@ -32,17 +32,17 @@ type Game struct {
 
 // NewGame initializes a new game state with a Snake and an initial food.
 func NewGame(startPosition image.Point, gridWidth, gridHeight , cellSize int) *Game {
-	//rand.Seed(time.Now().UnixNano()) // Seed RNG for random food placement
 	snake := entities.NewSnakeController(startPosition, gridWidth, gridHeight)
 	log.Println("Attempting to load sprite sheet...")
 
-	sprites := render.NewSpriteManager("assets/snake_sprite_sheet.png", cellSize)
+	sprites := render.NewSpriteManager(cellSize)
 
 	log.Println("SpriteManager initialized")
 	g := &Game{
 		State:        NewStateManager(),
 		Speed:        NewSpeedManager(),
 		UI:           render.NewUIManager(),
+		Renderer: 	  render.NewRenderer(sprites),
 		SpriteManager: sprites,
 		Snake:        snake,
 		Food:         entities.NewFood(snake, gridWidth, gridHeight),
@@ -53,11 +53,9 @@ func NewGame(startPosition image.Point, gridWidth, gridHeight , cellSize int) *G
 		screenHeight: gridHeight * cellSize,
 		gameOver:     false,
 		showRetry:    false,
+		frameDelay:   20,
 	}
-	// Place the Snake at the center of the grid and spawn an initial food.
 
-	g.frameDelay = 20
-	g.Renderer = render.NewRenderer(sprites)
 	return g
 }
 
@@ -85,12 +83,7 @@ func (g *Game) Update() error {
 		return nil
 	}
 
-	// Calculate the Snake's new head position based on current direction.
-	//if g.Snake.CanMoveTo(g.Snake.PendingDir, g.gridWidth, g.gridHeight) {
-	//	g.Snake.Dir = g.Snake.PendingDir
-	//}
-	//head := g.Snake.Head()           // current head position (last segment)
-	//newHead := head.Add(g.Snake.Dir) // Add direction vector to get new head
+
 	// Calculate the Snake's new head position based on current direction.
 	g.Snake.ApplyPendingDirection(g.gridWidth, g.gridHeight)
 	newHead := g.Snake.NextHeadPosition()
@@ -108,7 +101,6 @@ func (g *Game) Update() error {
 		g.Snake.MoveForward()
 	}
 
-
 	return nil // No error, continue game.
 }
 
@@ -117,7 +109,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Fill background (black).
 	screen.Fill(color.RGBA{A: 255})
 
-	// Draw the Snake as green squares.
+	// Draw the Snake.
 	g.Renderer.DrawSnake(screen, g.Snake)
 	// Draw the food as a red square.
 	g.Renderer.DrawFood(screen, g.Food, g.cellSize)

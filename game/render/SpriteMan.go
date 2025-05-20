@@ -41,7 +41,7 @@ func scaleSprite(src *ebiten.Image, targetWidth, targetHeight int) *ebiten.Image
 	return dst
 }
 
-func NewSpriteManager(_ string, cellSize int) *SpriteManager {
+func NewSpriteManager(cellSize int) *SpriteManager {
 	sprites := map[SnakePart]*ebiten.Image{
 		Head:           loadImageScaled("assets/snake_head_upward.png", cellSize, cellSize),
 		Tail:           loadImageScaled("assets/snake_tail.png", cellSize, cellSize),
