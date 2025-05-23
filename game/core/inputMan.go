@@ -28,7 +28,7 @@ func (g *Game) handlePauseToggle() {
 
 func (g *Game) handleRetryInput() {
 	// Keyboard restart
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.resetGame()
 		return
 	}

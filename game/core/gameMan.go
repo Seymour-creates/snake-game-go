@@ -3,10 +3,10 @@ package core
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"image"
-	"image/color"
 	"log"
 	"snakeGame/game/entities"
 	"snakeGame/game/render"
+	"snakeGame/game/ui"
 )
 
 // Game implements the ebiten.Game interface and holds the game state.
@@ -18,20 +18,20 @@ type Game struct {
 	Speed                     *SpeedManager
 	UI                        *render.UIManager
 	Renderer                  *render.Renderer
-	SpriteManager			  *render.SpriteManager
-	screenWidth, screenHeight int             // screen size in pixels for rendering
-	gridWidth, gridHeight     int             // grid size in cells (play field dimensions)
-	cellSize                  int             // pixel size of one grid cell
+	SpriteManager             *render.SpriteManager
+	screenWidth, screenHeight int                       // screen size in pixels for rendering
+	gridWidth, gridHeight     int                       // grid size in cells (play field dimensions)
+	cellSize                  int                       // pixel size of one grid cell
 	Snake                     *entities.SnakeController // the player-controlled Snake
-	Food                      *entities.Food  // the current food item on the board
-	gameOver                  bool            // whether the game is over
-	frameCount                int             // Tracks number of frames since last move
-	frameDelay                int             // Delay between moves (in frames)
-	showRetry                 bool            // used to toggle retry prompt visibility
+	Food                      *entities.Food            // the current food item on the board
+	gameOver                  bool                      // whether the game is over
+	frameCount                int                       // Tracks number of frames since last move
+	frameDelay                int                       // Delay between moves (in frames)
+	showRetry                 bool                      // used to toggle retry prompt visibility
 }
 
 // NewGame initializes a new game state with a Snake and an initial food.
-func NewGame(startPosition image.Point, gridWidth, gridHeight , cellSize int) *Game {
+func NewGame(startPosition image.Point, gridWidth, gridHeight, cellSize int) *Game {
 	snake := entities.NewSnakeController(startPosition, gridWidth, gridHeight)
 	log.Println("Attempting to load sprite sheet...")
 
@@ -39,21 +39,21 @@ func NewGame(startPosition image.Point, gridWidth, gridHeight , cellSize int) *G
 
 	log.Println("SpriteManager initialized")
 	g := &Game{
-		State:        NewStateManager(),
-		Speed:        NewSpeedManager(),
-		UI:           render.NewUIManager(),
-		Renderer: 	  render.NewRenderer(sprites),
+		State:         NewStateManager(),
+		Speed:         NewSpeedManager(),
+		UI:            render.NewUIManager(),
+		Renderer:      render.NewRenderer(sprites),
 		SpriteManager: sprites,
-		Snake:        snake,
-		Food:         entities.NewFood(snake, gridWidth, gridHeight),
-		gridWidth:    gridWidth,
-		gridHeight:   gridHeight,
-		cellSize:     cellSize,
-		screenWidth:  gridWidth * cellSize,
-		screenHeight: gridHeight * cellSize,
-		gameOver:     false,
-		showRetry:    false,
-		frameDelay:   20,
+		Snake:         snake,
+		Food:          entities.NewFood(snake, gridWidth, gridHeight),
+		gridWidth:     gridWidth,
+		gridHeight:    gridHeight,
+		cellSize:      cellSize,
+		screenWidth:   gridWidth * cellSize,
+		screenHeight:  gridHeight * cellSize,
+		gameOver:      false,
+		showRetry:     false,
+		frameDelay:    20,
 	}
 
 	return g
@@ -83,7 +83,6 @@ func (g *Game) Update() error {
 		return nil
 	}
 
-
 	// Calculate the Snake's new head position based on current direction.
 	g.Snake.ApplyPendingDirection(g.gridWidth, g.gridHeight)
 	newHead := g.Snake.NextHeadPosition()
@@ -106,18 +105,26 @@ func (g *Game) Update() error {
 
 // Draw renders the game state to the screen (called every frame after Update).
 func (g *Game) Draw(screen *ebiten.Image) {
-	// Fill background (black).
-	screen.Fill(color.RGBA{A: 255})
+
+	screenWidth := g.gridWidth * g.cellSize
+	screenHeight := g.gridHeight * g.cellSize
+
+	// Draw theme
+	ui.DrawBackground(screen, screenWidth, screenHeight, g.cellSize)
+	ui.DrawBorder(screen, screenWidth, screenHeight, g.cellSize)
 
 	// Draw the Snake.
 	g.Renderer.DrawSnake(screen, g.Snake)
-	// Draw the food as a red square.
-	g.Renderer.DrawFood(screen, g.Food, g.cellSize)
+
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(g.Food.Pos.X*g.cellSize), float64(g.Food.Pos.Y*g.cellSize))
+
+	// Draw the food.
+	ui.DrawFood(screen, g.Food.Pos, g.cellSize)
 
 	if g.State.Paused {
 		g.UI.DrawPauseOverlay(screen, g.screenWidth, g.screenHeight)
 	}
-
 
 	// Overlay game status text.
 	if g.State.GameOver {

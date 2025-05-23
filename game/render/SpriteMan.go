@@ -43,11 +43,11 @@ func scaleSprite(src *ebiten.Image, targetWidth, targetHeight int) *ebiten.Image
 
 func NewSpriteManager(cellSize int) *SpriteManager {
 	sprites := map[SnakePart]*ebiten.Image{
-		Head:           loadImageScaled("assets/snake_head_upward.png", cellSize, cellSize),
-		Tail:           loadImageScaled("assets/snake_tail.png", cellSize, cellSize),
-		BodyVertical:   loadImageScaled("assets/snake_body.png", cellSize, cellSize),
-		BodyHorizontal: loadImageScaled("assets/snake_body.png", cellSize, cellSize),
-		Bend:           loadImageScaled("assets/snake_body_bend.png", cellSize, cellSize),
+		Head:           loadImageScaled("assets/snake_yellow_head_16.png", cellSize, cellSize),
+		Tail:           loadImageScaled("assets/snake_yellow_blob.png", cellSize, cellSize),
+		BodyVertical:   loadImageScaled("assets/snake_yellow_blob.png", cellSize, cellSize),
+		BodyHorizontal: loadImageScaled("assets/snake_yellow_blob.png", cellSize, cellSize),
+		Bend:           loadImageScaled("assets/snake_yellow_blob.png", cellSize, cellSize),
 	}
 
 	return &SpriteManager{
@@ -67,12 +67,22 @@ func (s *SpriteManager) DrawSegment(screen *ebiten.Image, spriteType SnakePart, 
 	}
 
 	op := &ebiten.DrawImageOptions{}
+
+	// Scale image to cell size
+	scaleX := float64(s.CellSize) / float64(img.Bounds().Dx())
+	scaleY := float64(s.CellSize) / float64(img.Bounds().Dy())
+	op.GeoM.Scale(scaleX, scaleY)
+
+	// Apply rotation around the center of the cell
 	if rotation != 0 {
 		op.GeoM.Translate(-float64(s.CellSize)/2, -float64(s.CellSize)/2)
 		op.GeoM.Rotate(rotation)
 		op.GeoM.Translate(float64(s.CellSize)/2, float64(s.CellSize)/2)
 	}
 
+	// Translate to correct position
 	op.GeoM.Translate(float64(pos.X*s.CellSize), float64(pos.Y*s.CellSize))
+
+	// Draw to screen
 	screen.DrawImage(img, op)
 }

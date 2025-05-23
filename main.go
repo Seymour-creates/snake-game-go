@@ -5,6 +5,7 @@ import (
 	"image"
 	"log"
 	"snakeGame/game/core"
+	"snakeGame/game/ui"
 )
 
 func main() {
@@ -21,6 +22,10 @@ func main() {
 
 	// Initialize the Game instance (from our game package).
 	g := core.NewGame(start, gridWidth, gridHeight, cellSize)
+
+	if err := ui.LoadTheme(); err != nil {
+		log.Fatal(err)
+	}
 
 	// Start the game loop. Ebiten will call g.Update, g.Draw, g.Layout appropriately.
 	if err := ebiten.RunGame(g); err != nil {

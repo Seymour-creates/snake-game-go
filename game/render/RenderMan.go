@@ -2,8 +2,6 @@ package render
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
-	"image/color"
 	"math"
 	"snakeGame/game/entities"
 )
@@ -48,11 +46,4 @@ func (r *Renderer) DrawSnake(screen *ebiten.Image, sc *entities.SnakeController)
 
 		r.SpriteManager.DrawSegment(screen, spriteType, seg.Pos, angle*math.Pi/180)
 	}
-}
-
-// DrawFood renders the food block
-func (r *Renderer) DrawFood(screen *ebiten.Image, food *entities.Food, cellSize int) {
-	fx := food.Pos.X * cellSize
-	fy := food.Pos.Y * cellSize
-	vector.DrawFilledRect(screen, float32(fx), float32(fy), float32(cellSize), float32(cellSize), color.RGBA{R: 255, A: 255}, false)
 }
